@@ -15,13 +15,11 @@ public class Event implements Serializable {
     private int eventID;
 
     @ManyToOne
-    @Column(name = "venueID")
     @JoinColumn(name = "venueID", referencedColumnName = "venueID")
     private Venue venue;
 
     @ManyToOne
     @JoinColumn(name = "eventTypeID", referencedColumnName = "eventTypeID")
-    @Column(name = "eventTypeID")
     private EventType eventType;
 
     @Column(name = "name")
