@@ -8,11 +8,9 @@ import org.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TicketManagementService implements ITicketManagementService{
@@ -48,7 +46,7 @@ public class TicketManagementService implements ITicketManagementService{
 
 
     @Override
-    public List<Event> findEventsByVenueLocationAndByEventType(String location, String eventType) {
+    public List<Event> findEventsByVenueTypeAndByEventType(String location, String eventType) {
         return eventRepository.findByVenueTypeAndEventType_Name(location,eventType);
     }
 
@@ -57,16 +55,29 @@ public class TicketManagementService implements ITicketManagementService{
         return ticketCategoryRepository.findTicketCategoriesByEvent(event);
     }
 
-    @Override
-    public Order saveOrder(int customerID,int ticketCategoryID,int numberOfTickets)
-    {
+    public Optional<Order> saveOrder(int customerID, int ticketCategoryID, int numberOfTickets) {
         Customer customer = customerRepository.findCustomerByCustomerID(customerID);
         TicketCategory ticketCategory = ticketCategoryRepository.findTicketCategoryByTicketCategoryID(ticketCategoryID);
-        int numberOfTicketsAvailable = ticketCategory.getNoAvailable();
-        ticketCategory.setNoAvailable(numberOfTicketsAvailable-numberOfTickets);
-        Order order = new Order(ticketCategory,customer,numberOfTickets,LocalDateTime.now(),
-                numberOfTickets*ticketCategory.getPrice());
 
-        return orderRepository.save(order);
+        if (customer == null || ticketCategory == null) {
+            return Optional.empty();
+        }
+
+        int numberOfTicketsAvailable = ticketCategory.getNoAvailable();
+        ticketCategory.setNoAvailable(numberOfTicketsAvailable - numberOfTickets);
+        Order order = new Order(ticketCategory, customer, numberOfTickets, LocalDateTime.now(),
+                numberOfTickets * ticketCategory.getPrice());
+
+        return Optional.of(orderRepository.save(order));
+    }
+
+    @Override
+    public List<Event> findEventsByVenueType(String venueType) {
+        return eventRepository.findByVenueType(venueType);
+    }
+
+    @Override
+    public List<Event> findEventByEventType(String eventType) {
+        return eventRepository.findByEventType_Name(eventType);
     }
 }

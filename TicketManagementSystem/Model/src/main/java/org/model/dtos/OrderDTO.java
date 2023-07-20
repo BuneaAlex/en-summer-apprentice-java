@@ -1,4 +1,4 @@
-package org.model;
+package org.model.dtos;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

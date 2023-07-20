@@ -1,12 +1,18 @@
 package org.restservices;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.business.ITicketManagementService;
 import org.model.*;
+import org.model.dtos.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 //@CrossOrigin
 @RestController
@@ -14,6 +20,8 @@ import java.util.List;
 public class AppController {
 
     private static final String template = "Hello, %s!";
+
+    private static final Logger log= LogManager.getLogger();
 
     @RequestMapping("/greeting")
     public  String greeting() {
@@ -27,14 +35,29 @@ public class AppController {
     @RequestMapping(value = "/events/all", method=RequestMethod.GET)
     public Event[] getAllEvents() {
         List<Event> events = service.findAllEvents();
+        log.info(events);
         return events.toArray(new Event[0]);
     }
 
     @RequestMapping(value = "/events", method = RequestMethod.GET)
-    public EventDTO[] getEventsByVenueLocationAndEventType(@RequestParam("venueType") String venueType,
-                                                        @RequestParam("eventType") String eventType) {
+    public EventDTO[] getEventsByVenueLocationAndEventType(@RequestParam(value = "venueType",required = false) String venueType,
+                                                           @RequestParam(value = "eventType",required = false) String eventType) {
 
-        List<Event> events = service.findEventsByVenueLocationAndByEventType(venueType,eventType);
+        List<Event> events = new ArrayList<>();
+        if(venueType != null && eventType != null)
+             events = service.findEventsByVenueTypeAndByEventType(venueType,eventType);
+        else if (venueType != null) {
+            events = service.findEventsByVenueType(venueType);
+        }
+        else if (eventType != null){
+            events = service.findEventByEventType(eventType);
+        }
+        else
+        {
+            events = service.findAllEvents();
+        }
+
+
         List<EventDTO> eventDTOS = getEventDTOS(events);
         return eventDTOS.toArray(new EventDTO[0]);
     }
@@ -45,9 +68,24 @@ public class AppController {
         {
             List<TicketCategory> ticketCategories = service.findTicketCategoriesByEvent(event);
             List<TicketCategoryDTO> ticketCategoryDTOS = getTicketCategoryDTOS(ticketCategories);
+            Venue venue = event.getVenue();
+            VenueDTO venueDTO = VenueDTO.builder().
+                    location(venue.getLocation()).
+                    capacity(venue.getCapacity()).
+                    type(venue.getType()).build();
 
-            EventDTO eventDTO = new EventDTO(event.getEventID(),event.getVenue(),event.getEventType().getName(),
-                    event.getName(),event.getDescription(),event.getStartDate(),event.getEndDate(),ticketCategoryDTOS, event.getImage());
+
+            EventDTO eventDTO = EventDTO.builder()
+                    .eventID(event.getEventID())
+                    .venue(venueDTO)
+                    .eventType(event.getEventType().getName())
+                    .name(event.getName())
+                    .description(event.getDescription())
+                    .startDate(event.getStartDate())
+                    .endDate(event.getEndDate())
+                    .ticketCategories(ticketCategoryDTOS)
+                    .image(event.getImage())
+                    .build();
             eventDTOS.add(eventDTO);
         }
         return eventDTOS;
@@ -86,17 +124,25 @@ public class AppController {
     }
 
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
-    public OrderDTO saveOrder(@RequestBody OrderRequest orderRequest) {
+    public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) {
 
-        int customerID = orderRequest.getCustomerID();
-        int eventID = orderRequest.getEventID();
-        int ticketCategoryID = orderRequest.getTicketCategoryID();
-        int numberOfTickets = orderRequest.getNumberOfTickets();
+        int customerID = orderRequest.customerID();
+        int eventID = orderRequest.eventID();
+        int ticketCategoryID = orderRequest.ticketCategoryID();
+        int numberOfTickets = orderRequest.numberOfTickets();
 
-        Order order = service.saveOrder(customerID,ticketCategoryID,numberOfTickets);
-        TicketCategoryDTO ticketCategoryDTO = getTicketCategoryDTOFromTicketCategory(order.getTicketCategory());
-        OrderDTO orderDTO = new OrderDTO(order.getOrderID(),eventID,ticketCategoryDTO,order.getOrderedAt(),order.getNumberOfTickets(),order.getTotalPrice());
-        return orderDTO;
+        Optional<Order> orderOptional = service.saveOrder(customerID, ticketCategoryID, numberOfTickets);
+
+        if (orderOptional.isEmpty()) {
+            return new ResponseEntity<>("Order could not be added, customer or ticket category not found", HttpStatus.NOT_FOUND);
+        } else {
+            Order order = orderOptional.get();
+            TicketCategoryDTO ticketCategoryDTO = getTicketCategoryDTOFromTicketCategory(order.getTicketCategory());
+            OrderDTO orderDTO = new OrderDTO(order.getOrderID(), eventID, ticketCategoryDTO, order.getOrderedAt(), order.getNumberOfTickets(), order.getTotalPrice());
+            return new ResponseEntity<>(orderDTO, HttpStatus.OK);
+        }
+
+
     }
 
 }
