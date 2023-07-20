@@ -4,7 +4,12 @@ import org.model.Customer;
 import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
-import org.persistence.*;
+import org.persistence.CustomerRepository;
+import org.persistence.EventTypeRepository;
+import org.persistence.TicketCategoryRepository;
+import org.persistence.EventRepository;
+import org.persistence.VenueRepository;
+import org.persistence.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -3,8 +3,16 @@ package org.restservices;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.business.ITicketManagementService;
-import org.model.*;
-import org.model.dtos.*;
+import org.model.Event;
+import org.model.Order;
+import org.model.TicketCategory;
+import org.model.Venue;
+import org.model.dtos.EventDTO;
+import org.model.dtos.VenueDTO;
+import org.model.dtos.OrderRequest;
+import org.model.dtos.OrderDTO;
+import org.model.dtos.TicketCategoryDTO;
+import org.model.errors.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +29,7 @@ public class AppController {
 
     private static final String template = "Hello, %s!";
 
-    private static final Logger log= LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @RequestMapping("/greeting")
     public  String greeting() {
@@ -35,7 +43,7 @@ public class AppController {
     @RequestMapping(value = "/events/all", method=RequestMethod.GET)
     public Event[] getAllEvents() {
         List<Event> events = service.findAllEvents();
-        log.info(events);
+        LOGGER.info(events);
         return events.toArray(new Event[0]);
     }
 
@@ -69,23 +77,11 @@ public class AppController {
             List<TicketCategory> ticketCategories = service.findTicketCategoriesByEvent(event);
             List<TicketCategoryDTO> ticketCategoryDTOS = getTicketCategoryDTOS(ticketCategories);
             Venue venue = event.getVenue();
-            VenueDTO venueDTO = VenueDTO.builder().
-                    location(venue.getLocation()).
-                    capacity(venue.getCapacity()).
-                    type(venue.getType()).build();
+            VenueDTO venueDTO = new VenueDTO(venue.getLocation(), venue.getCapacity(), venue.getType());
 
+            EventDTO eventDTO = new EventDTO(event.getEventID(),venueDTO,event.getEventType().getName(),event.getName(),
+                    event.getDescription(),event.getStartDate(),event.getEndDate(),ticketCategoryDTOS,event.getImage());
 
-            EventDTO eventDTO = EventDTO.builder()
-                    .eventID(event.getEventID())
-                    .venue(venueDTO)
-                    .eventType(event.getEventType().getName())
-                    .name(event.getName())
-                    .description(event.getDescription())
-                    .startDate(event.getStartDate())
-                    .endDate(event.getEndDate())
-                    .ticketCategories(ticketCategoryDTOS)
-                    .image(event.getImage())
-                    .build();
             eventDTOS.add(eventDTO);
         }
         return eventDTOS;
@@ -134,7 +130,8 @@ public class AppController {
         Optional<Order> orderOptional = service.saveOrder(customerID, ticketCategoryID, numberOfTickets);
 
         if (orderOptional.isEmpty()) {
-            return new ResponseEntity<>("Order could not be added, customer or ticket category not found", HttpStatus.NOT_FOUND);
+            Error error = new Error("Order could not be added, customer or ticket category not found");
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
         } else {
             Order order = orderOptional.get();
             TicketCategoryDTO ticketCategoryDTO = getTicketCategoryDTOFromTicketCategory(order.getTicketCategory());
