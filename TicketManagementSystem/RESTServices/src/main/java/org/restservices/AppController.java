@@ -7,16 +7,16 @@ import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
 import org.model.Venue;
-import org.model.dtos.EventDTO;
-import org.model.dtos.VenueDTO;
-import org.model.dtos.OrderRequest;
-import org.model.dtos.OrderDTO;
-import org.model.dtos.TicketCategoryDTO;
+import org.model.dtos.*;
 import org.model.errors.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class AppController {
     ITicketManagementService service;
 
 
-    @RequestMapping(value = "/events/all", method=RequestMethod.GET)
+    @RequestMapping(value = "/events/all", method= RequestMethod.GET)
     public Event[] getAllEvents() {
         List<Event> events = service.findAllEvents();
         LOGGER.info(events);
