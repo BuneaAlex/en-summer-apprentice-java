@@ -45,8 +45,8 @@ public class TicketManagementService implements ITicketManagementService{
     }
 
     @Override
-    public List<Order> findAllOrdersForCustomer(int customerID) {
-        return orderRepository.findOrdersByCustomer_CustomerID(customerID);
+    public List<Order> findAllOrdersForCustomer(String email) {
+        return orderRepository.findOrdersByCustomerEmail(email);
     }
 
 
@@ -60,8 +60,8 @@ public class TicketManagementService implements ITicketManagementService{
         return ticketCategoryRepository.findTicketCategoriesByEvent(event);
     }
 
-    public Optional<Order> saveOrder(int customerID, int ticketCategoryID, int numberOfTickets) {
-        Customer customer = customerRepository.findCustomerByCustomerID(customerID);
+    public Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) {
+        Customer customer = customerRepository.findCustomerByEmail(email);
         TicketCategory ticketCategory = ticketCategoryRepository.findTicketCategoryByTicketCategoryID(ticketCategoryID);
 
         if (customer == null || ticketCategory == null) {

@@ -12,12 +12,12 @@ public interface ITicketManagementService {
 
     List<Event> findAllEvents();
 
-    List<Order> findAllOrdersForCustomer(int customerID);
+    List<Order> findAllOrdersForCustomer(String email);
     List<Event> findEventsByVenueTypeAndByEventType(String venueType,String eventType);
 
     List<TicketCategory> findTicketCategoriesByEvent(Event event);
 
-    Optional<Order> saveOrder(int customerID, int ticketCategoryID, int numberOfTickets);
+    Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets);
 
     List<Event> findEventsByVenueType(String venueType);
     List<Event> findEventByEventType(String eventType);

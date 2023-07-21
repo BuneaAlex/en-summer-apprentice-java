@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -105,9 +107,12 @@ public class AppController {
     }
 
     @RequestMapping(value = "/orders", method = RequestMethod.GET)
-    public OrderDTO[] getOrdersByCustomerId(@RequestParam("customerId") int customerId) {
+    public OrderDTO[] getOrdersByCustomerEmail() {
 
-        List<Order> orders = service.findAllOrdersForCustomer(customerId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        List<Order> orders = service.findAllOrdersForCustomer(email);
         List<OrderDTO> orderDTOS = new ArrayList<>();
         for(Order order : orders)
         {
@@ -124,12 +129,14 @@ public class AppController {
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
     public ResponseEntity<?> saveOrder(@RequestBody OrderRequest orderRequest) {
 
-        int customerID = orderRequest.customerID();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
         int eventID = orderRequest.eventID();
         int ticketCategoryID = orderRequest.ticketCategoryID();
         int numberOfTickets = orderRequest.numberOfTickets();
 
-        Optional<Order> orderOptional = service.saveOrder(customerID, ticketCategoryID, numberOfTickets);
+        Optional<Order> orderOptional = service.saveOrder(email, ticketCategoryID, numberOfTickets);
 
         if (orderOptional.isEmpty()) {
             Error error = new Error("Order could not be added, customer or ticket category not found");
