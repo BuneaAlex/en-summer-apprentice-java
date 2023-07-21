@@ -85,4 +85,9 @@ public class TicketManagementService implements ITicketManagementService{
     public List<Event> findEventByEventType(String eventType) {
         return eventRepository.findByEventType_Name(eventType);
     }
+
+    @Override
+    public Customer findCustomerByEmail(String email) {
+        return customerRepository.findCustomerByEmail(email);
+    }
 }

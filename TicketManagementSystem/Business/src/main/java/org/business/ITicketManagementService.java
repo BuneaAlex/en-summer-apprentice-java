@@ -1,5 +1,6 @@
 package org.business;
 
+import org.model.Customer;
 import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
@@ -20,4 +21,6 @@ public interface ITicketManagementService {
 
     List<Event> findEventsByVenueType(String venueType);
     List<Event> findEventByEventType(String eventType);
+
+    Customer findCustomerByEmail(String email);
 }
