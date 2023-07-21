@@ -11,7 +11,7 @@ public class TicketCategory implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticketCategoryID")
-    private int id;
+    private int ticketCategoryID;
 
     @ManyToOne
     @JoinColumn(name = "eventID", referencedColumnName = "eventID")
@@ -27,7 +27,7 @@ public class TicketCategory implements Serializable {
     private String description;
 
     public TicketCategory(int id, Event event, float price, int noAvailable, String description) {
-        this.id = id;
+        this.ticketCategoryID = id;
         this.event = event;
         this.price = price;
         this.noAvailable = noAvailable;
@@ -44,12 +44,12 @@ public class TicketCategory implements Serializable {
     public TicketCategory() {
     }
 
-    public int getId() {
-        return id;
+    public int getTicketCategoryID() {
+        return ticketCategoryID;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTicketCategoryID(int ticketCategoryID) {
+        this.ticketCategoryID = ticketCategoryID;
     }
 
     public Event getEvent() {
@@ -89,19 +89,19 @@ public class TicketCategory implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TicketCategory that = (TicketCategory) o;
-        return id == that.id && Float.compare(that.price, price) == 0 && noAvailable == that.noAvailable && Objects.equals(event, that.event) && Objects.equals(description, that.description);
+        return ticketCategoryID == that.ticketCategoryID && Float.compare(that.price, price) == 0 && noAvailable == that.noAvailable && Objects.equals(event, that.event) && Objects.equals(description, that.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, event, price, noAvailable, description);
+        return Objects.hash(ticketCategoryID, event, price, noAvailable, description);
     }
 
     @Override
     public String toString() {
         return "TicketCategory{" +
-                "id=" + id +
-                ", eventID=" + event +
+                "ticketCategoryID=" + ticketCategoryID +
+                ", event=" + event +
                 ", price=" + price +
                 ", noAvailable=" + noAvailable +
                 ", description='" + description + '\'' +

@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.6'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group 'org.business'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation project(':Model')
+    implementation project(':Persistence')
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    //implementation 'org.postgresql:postgresql:42.5.0'
+    // https://mvnrepository.com/artifact/org.umlg/sqlg-postgres-dialect
+    //implementation group: 'org.umlg', name: 'sqlg-postgres-dialect', version: '1.3.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.1'
+    implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+    implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
+    implementation 'org.hibernate:hibernate-core:5.2.10.Final'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation('com.microsoft.sqlserver:mssql-jdbc') {
+        version {
+            strictly '12.2.0.jre8'
+            // Or whatever version you need, i.e. 10.2.0.jre11, etc
+        }
+        // https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc_auth
+        implementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc_auth', version: '9.4.0.x64'
+
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
