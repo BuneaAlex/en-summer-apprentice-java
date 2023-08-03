@@ -7,25 +7,29 @@ import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
 import org.model.Venue;
-import org.model.dtos.EventDTO;
-import org.model.dtos.VenueDTO;
-import org.model.dtos.OrderRequest;
-import org.model.dtos.OrderDTO;
-import org.model.dtos.TicketCategoryDTO;
+import org.model.dtos.*;
 import org.model.errors.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-//@CrossOrigin
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/management")
 public class AppController {
@@ -42,6 +46,37 @@ public class AppController {
     @Autowired
     ITicketManagementService service;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @RequestMapping(value = "/login", method=RequestMethod.POST)
+    public ResponseEntity<?> login(@RequestBody LoginForm loginForm) {
+        try {
+            // Authenticate the user using the provided credentials (email and password)
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginForm.username(), loginForm.password())
+            );
+            // If authentication is successful, load the user details
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginForm.username());
+            // You can directly return the UserDetails as a response
+            return ResponseEntity.ok(userDetails);
+        } catch (BadCredentialsException e) {
+            // If authentication fails (incorrect username or password), return an error response
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect email or password");
+        }
+    }
+
+    @RequestMapping(value = "/logout", method=RequestMethod.GET)
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
+        return ResponseEntity.ok("Logout Successful");
+    }
 
     @RequestMapping(value = "/events/all", method=RequestMethod.GET)
     @PreAuthorize("isAuthenticated()")

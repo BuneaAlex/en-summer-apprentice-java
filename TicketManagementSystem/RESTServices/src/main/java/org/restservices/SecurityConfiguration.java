@@ -22,10 +22,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login").permitAll()
+                .antMatchers("/management/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic();
+                .httpBasic()
+                .and()
+                .logout()
+                .logoutUrl("/management/logout") // Define the logout URL
+                .logoutSuccessUrl("/management/login") // Redirect after successful logout
+                .invalidateHttpSession(true);
     }
 
     @Bean
