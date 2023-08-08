@@ -131,7 +131,7 @@ public class AppController {
             List<TicketCategory> ticketCategories = service.findTicketCategoriesByEvent(event);
             List<TicketCategoryDTO> ticketCategoryDTOS = getTicketCategoryDTOS(ticketCategories);
             Venue venue = event.getVenue();
-            VenueDTO venueDTO = new VenueDTO(venue.getLocation(), venue.getCapacity(), venue.getType());
+            VenueDTO venueDTO = new VenueDTO(venue.getType(), venue.getCapacity(),venue.getLocation() );
 
             EventDTO eventDTO = new EventDTO(event.getEventID(),venueDTO,event.getEventType().getName(),event.getName(),
                     event.getDescription(),event.getStartDate().format(Constants.DATE_TIME_FORMATTER),event.getEndDate().format(Constants.DATE_TIME_FORMATTER),ticketCategoryDTOS,event.getImage());
@@ -146,7 +146,7 @@ public class AppController {
         List<TicketCategory> ticketCategories = service.findTicketCategoriesByEvent(event);
         List<TicketCategoryDTO> ticketCategoryDTOS = getTicketCategoryDTOS(ticketCategories);
         Venue venue = event.getVenue();
-        VenueDTO venueDTO = new VenueDTO(venue.getLocation(), venue.getCapacity(), venue.getType());
+        VenueDTO venueDTO = new VenueDTO(venue.getType(), venue.getCapacity(),venue.getLocation() );
 
         EventDTO eventDTO = new EventDTO(event.getEventID(),venueDTO,event.getEventType().getName(),event.getName(),
                 event.getDescription(),event.getStartDate().format(Constants.DATE_TIME_FORMATTER),event.getEndDate().format(Constants.DATE_TIME_FORMATTER),ticketCategoryDTOS,event.getImage());
