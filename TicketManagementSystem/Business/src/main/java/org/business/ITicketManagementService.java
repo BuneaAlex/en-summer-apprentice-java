@@ -23,4 +23,6 @@ public interface ITicketManagementService {
     List<Event> findEventByEventType(String eventType);
 
     Customer findCustomerByEmail(String email);
+
+    Event findEventById(int eventId);
 }

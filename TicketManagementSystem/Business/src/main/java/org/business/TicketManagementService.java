@@ -90,4 +90,9 @@ public class TicketManagementService implements ITicketManagementService{
     public Customer findCustomerByEmail(String email) {
         return customerRepository.findCustomerByEmail(email);
     }
+
+    @Override
+    public Event findEventById(int eventId) {
+        return eventRepository.findByEventID(eventId);
+    }
 }

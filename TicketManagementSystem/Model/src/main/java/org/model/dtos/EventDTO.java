@@ -9,8 +9,8 @@ public record EventDTO(int eventID,
                        String eventType,
                        String name,
                        String description,
-                       LocalDateTime startDate,
-                       LocalDateTime endDate,
+                       String startDate,
+                       String endDate,
                        List<TicketCategoryDTO> ticketCategories,
                        String image) implements Serializable {
 }
