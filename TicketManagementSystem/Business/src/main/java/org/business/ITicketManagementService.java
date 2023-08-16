@@ -4,6 +4,7 @@ import org.model.Customer;
 import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
+import org.model.errors.NoTicketsLeftException;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public interface ITicketManagementService {
 
     List<TicketCategory> findTicketCategoriesByEvent(Event event);
 
-    Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets);
+    Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) throws NoTicketsLeftException;
 
     List<Event> findEventsByVenueType(String venueType);
     List<Event> findEventByEventType(String eventType);

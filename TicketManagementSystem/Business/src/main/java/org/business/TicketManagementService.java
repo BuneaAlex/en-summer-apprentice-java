@@ -4,6 +4,7 @@ import org.model.Customer;
 import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
+import org.model.errors.NoTicketsLeftException;
 import org.persistence.CustomerRepository;
 import org.persistence.EventTypeRepository;
 import org.persistence.TicketCategoryRepository;
@@ -60,7 +61,7 @@ public class TicketManagementService implements ITicketManagementService{
         return ticketCategoryRepository.findTicketCategoriesByEvent(event);
     }
 
-    public Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) {
+    public Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) throws NoTicketsLeftException {
         Customer customer = customerRepository.findCustomerByEmail(email);
         TicketCategory ticketCategory = ticketCategoryRepository.findTicketCategoryByTicketCategoryID(ticketCategoryID);
 
@@ -69,7 +70,13 @@ public class TicketManagementService implements ITicketManagementService{
         }
 
         int numberOfTicketsAvailable = ticketCategory.getNoAvailable();
-        ticketCategory.setNoAvailable(numberOfTicketsAvailable - numberOfTickets);
+
+        int numberOfTicketsLeft = numberOfTicketsAvailable - numberOfTickets;
+
+        if(numberOfTicketsLeft < 0)
+            throw new NoTicketsLeftException("No more tickets left");
+
+        ticketCategory.setNoAvailable(numberOfTicketsLeft);
         Order order = new Order(ticketCategory, customer, numberOfTickets, LocalDateTime.now(),
                 numberOfTickets * ticketCategory.getPrice());
 

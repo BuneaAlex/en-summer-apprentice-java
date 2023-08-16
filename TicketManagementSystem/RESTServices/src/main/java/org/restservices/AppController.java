@@ -9,6 +9,7 @@ import org.model.TicketCategory;
 import org.model.Venue;
 import org.model.dtos.*;
 import org.model.errors.Error;
+import org.model.errors.NoTicketsLeftException;
 import org.model.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:5173"})
 @RestController
 @RequestMapping("/management")
 public class AppController {
@@ -199,18 +200,24 @@ public class AppController {
         int ticketCategoryID = orderRequest.ticketCategoryID();
         int numberOfTickets = orderRequest.numberOfTickets();
 
-        Optional<Order> orderOptional = service.saveOrder(email, ticketCategoryID, numberOfTickets);
-
-        if (orderOptional.isEmpty()) {
-            Error error = new Error("Order could not be added, customer or ticket category not found");
-            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-        } else {
-            Order order = orderOptional.get();
-            TicketCategoryDTO ticketCategoryDTO = getTicketCategoryDTOFromTicketCategory(order.getTicketCategory());
-            OrderDTO orderDTO = new OrderDTO(order.getOrderID(), eventID, ticketCategoryDTO, order.getOrderedAt().format(Constants.DATE_TIME_FORMATTER), order.getNumberOfTickets(), order.getTotalPrice());
-            return new ResponseEntity<>(orderDTO, HttpStatus.OK);
+        try
+        {
+            Optional<Order> orderOptional = service.saveOrder(email, ticketCategoryID, numberOfTickets);
+            if (orderOptional.isEmpty()) {
+                Error error = new Error("Order could not be added, customer or ticket category not found");
+                return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+            } else {
+                Order order = orderOptional.get();
+                TicketCategoryDTO ticketCategoryDTO = getTicketCategoryDTOFromTicketCategory(order.getTicketCategory());
+                OrderDTO orderDTO = new OrderDTO(order.getOrderID(), eventID, ticketCategoryDTO, order.getOrderedAt().format(Constants.DATE_TIME_FORMATTER), order.getNumberOfTickets(), order.getTotalPrice());
+                return new ResponseEntity<>(orderDTO, HttpStatus.OK);
+            }
         }
-
+        catch(NoTicketsLeftException ex)
+        {
+            Error error = new Error(ex.getMessage());
+            return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        }
 
     }
 
