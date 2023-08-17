@@ -74,7 +74,7 @@ public class TicketManagementService implements ITicketManagementService{
         int numberOfTicketsLeft = numberOfTicketsAvailable - numberOfTickets;
 
         if(numberOfTicketsLeft < 0)
-            throw new NoTicketsLeftException("No more tickets left");
+            throw new NoTicketsLeftException("Only " + numberOfTicketsAvailable + " tickets left");
 
         ticketCategory.setNoAvailable(numberOfTicketsLeft);
         Order order = new Order(ticketCategory, customer, numberOfTickets, LocalDateTime.now(),
