@@ -9,9 +9,11 @@ import org.model.TicketCategory;
 import org.model.Venue;
 import org.model.dtos.*;
 import org.model.errors.Error;
+import org.model.errors.IncorrectNumberOfTickets;
 import org.model.errors.NoTicketsLeftException;
 import org.model.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -213,12 +215,21 @@ public class AppController {
                 return new ResponseEntity<>(orderDTO, HttpStatus.OK);
             }
         }
-        catch(NoTicketsLeftException ex)
+        catch(NoTicketsLeftException | IncorrectNumberOfTickets ex)
         {
             Error error = new Error(ex.getMessage());
             return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    @RequestMapping(value = "/events/page", method = RequestMethod.GET)
+    public EventDTO[] getEventsPagination(@RequestParam(value = "pageNumber") int pageNumber,
+                                          @RequestParam(value = "pageSize") int pageSize) {
+
+        List<Event> events = service.findEventsByPage(pageNumber, pageSize);
+        List<EventDTO> eventDTOS = getEventDTOS(events);
+        return eventDTOS.toArray(new EventDTO[0]);
     }
 
 }

@@ -26,17 +26,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
-                //.cors().configurationSource(corsConfigurationSource())
-                //.and()
+                .cors().configurationSource(corsConfigurationSource())
+                .and()
                 .authorizeRequests()
                 .antMatchers("/management/login").permitAll()
-                .anyRequest().permitAll() // Adjust to your authentication needs
+                .anyRequest().authenticated() // Adjust to your authentication needs
                 .and()
                 .httpBasic()
                 .and()
                 .logout()
                 .logoutUrl("/management/logout") // Define the logout URL
-                .logoutSuccessUrl("http://localhost:5173") // Redirect after successful logout
+                .logoutSuccessUrl("http://localhost:5173/login") // Redirect after successful logout
                 .invalidateHttpSession(true);
     }
 
@@ -52,11 +52,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000","http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "content-type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

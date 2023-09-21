@@ -4,6 +4,7 @@ import org.model.Customer;
 import org.model.Event;
 import org.model.Order;
 import org.model.TicketCategory;
+import org.model.errors.IncorrectNumberOfTickets;
 import org.model.errors.NoTicketsLeftException;
 import org.persistence.CustomerRepository;
 import org.persistence.EventTypeRepository;
@@ -12,6 +13,9 @@ import org.persistence.EventRepository;
 import org.persistence.VenueRepository;
 import org.persistence.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -61,7 +65,13 @@ public class TicketManagementService implements ITicketManagementService{
         return ticketCategoryRepository.findTicketCategoriesByEvent(event);
     }
 
-    public Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) throws NoTicketsLeftException {
+    public Optional<Order> saveOrder(String email, int ticketCategoryID, int numberOfTickets) throws NoTicketsLeftException, IncorrectNumberOfTickets {
+
+        if(numberOfTickets <= 0)
+        {
+            throw new IncorrectNumberOfTickets("Tickets bought can't be 0 or negative!");
+        }
+
         Customer customer = customerRepository.findCustomerByEmail(email);
         TicketCategory ticketCategory = ticketCategoryRepository.findTicketCategoryByTicketCategoryID(ticketCategoryID);
 
@@ -102,4 +112,12 @@ public class TicketManagementService implements ITicketManagementService{
     public Event findEventById(int eventId) {
         return eventRepository.findByEventID(eventId);
     }
+
+    @Override
+    public List<Event> findEventsByPage(int pageNumber,int pageSize)
+    {
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        return eventRepository.findAll(pageable).getContent();
+    }
+
 }
